@@ -27,8 +27,8 @@ class DescriptorTypes(Enum):
 
 
 class BaseDescriptor:
-    def __init__(self):
-        self.data = {}
+    def __init__(self, data):
+        self.data = data
 
     def pack(self):
         message = b''
@@ -59,9 +59,9 @@ class DeviceDescriptor(BaseDescriptor):
         (1, 'bNumConfigurations')
     ]
 
-    def __init__(self, data, configurations):
-        self.configurations = configurations
-        super().__init__()
+    def __init__(self, data):
+        # self.configurations = configurations
+        super().__init__(data)
 
 
 class ConfigurationDescriptor(BaseDescriptor):

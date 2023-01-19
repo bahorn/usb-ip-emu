@@ -2,6 +2,7 @@
 Base device to inherit from.
 """
 from enum import Enum
+from .descriptors import DeviceDescriptor, DescriptorTypes, USBVersions
 
 
 class StandardRequestID(Enum):
@@ -76,6 +77,26 @@ class BaseDevice:
         Function that is called on each command.
         """
         pass
+
+    def descriptor(self):
+        return DeviceDescriptor(
+            {
+                'bLength': 18,
+                'bDescriptorType': DescriptorTypes.DEVICE.value,
+                'bcdUSB': USBVersions.USB_2_0,
+                'bDeviceClass': self.bDeviceClass(),
+                'bDeviceSubClass': self.bDeviceSubClass(),
+                'bDeviceProtocol': self.bDeviceProtocol(),
+                'bMaxPacketSize': 64,
+                'idVendor': self.idVendor(),
+                'idProduct': self.idProduct(),
+                'bcdDevice': self.bcdDevice(),
+                'iManufacturer': 0,
+                'iProduct': 0,
+                'iSerialNumber': 0,
+                'bNumConfigurations': self.bNumConfigurations()
+            }
+        )
 
     # Implementations of standard requests.
 

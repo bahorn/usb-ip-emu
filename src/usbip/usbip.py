@@ -6,7 +6,7 @@ from .exceptions import ParseError
 
 class USBIPCmd(Enum):
     USBIP_CMD_SUBMIT = 0x00000001
-    USBIP_RET_SUNMIT = 0x00000003
+    USBIP_RET_SUBMIT = 0x00000003
     USBIP_CMD_UNLINK = 0x00000002
     USBIP_RET_UNLINK = 0x00000004
 
@@ -146,11 +146,15 @@ class USBIPRetSubmit:
         message += struct.pack('>I', 0)
         # number_of_packets
         message += struct.pack('>I', 0xffffffff)
+        # error count
+        message += struct.pack('>I', 0)
         # padding
         message += b'\x00'*8
         # transfer buffer
         message += self.data
         # iso_packet_descriptor
+
+        return message
 
 
 class USBIPCmdUnlink(USBIPHeaderBasic):

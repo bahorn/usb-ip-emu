@@ -18,7 +18,7 @@ from .message import \
         USBIPReplyDevlist, \
         USBIPReplyImport
 
-from .usbip import process_message
+from .usbip import process_message, USBIPCmd, USBIPRetUnlink, USBIPRetSubmit
 
 
 USBIPState = Enum('USBIPState', ['OP', 'USBIP'])
@@ -88,10 +88,21 @@ class USBIP(Protocol):
         res = process_message(data)
         if res:
             print(vars(res))
-            # now let the device process the message
-            response = self.device.command(res)
-            # decide how we pack this.
-            print(response)
+            match res.command:
+                case USBIPCmd.USBIP_CMD_SUBMIT:
+                    # now let the device process the message
+                    response = self.device.command(res)
+                    # decide how we pack this.
+                    if response:
+                        self.transport.write(
+                                USBIPRetSubmit(
+                                    res.seqnum, 0, response.pack()
+                                ).pack()
+                        )
+                case USBIPCmd.USBIP_CMD_UNLINK:
+                    return self.transport.write(
+                            USBIPRetUnlink(res.unlink_seqnum[0], 0).pack()
+                    )
 
 
 class USBIPFactory(Factory):
