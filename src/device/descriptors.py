@@ -28,8 +28,7 @@ class DescriptorTypes(Enum):
 
 
 class BaseDescriptor:
-    def __init__(self, data, max_length=None):
-        # self.configurations = configurations
+    def __init__(self, data):
         data_fixed = copy.deepcopy(data)
 
         # Compute the max size, in case this needs bLength
@@ -37,16 +36,15 @@ class BaseDescriptor:
         if 'bLength' not in data_fixed:
             data_fixed['bLength'] = bLength
 
-        if max_length and data_fixed['bLength'] > max_length:
-            data_fixed['bLength'] = max_length
-
         if 'bDescriptorType' not in data_fixed:
             data_fixed['bDescriptorType'] = self.TYPE.value
 
         self.data = data_fixed
-        self.max_length = max_length
 
-    def pack(self):
+    def pack(self, max_length=None):
+        if max_length and self.data['bLength'] > max_length:
+            self.data['bLength'] = max_length
+
         message = b''
         for size, key in self.ORDER:
             match size:
@@ -55,8 +53,8 @@ class BaseDescriptor:
                 case 2:
                     message += struct.pack('<H', self.data[key])
 
-        if self.max_length:
-            message = message[:self.max_length]
+        if max_length:
+            message = message[:max_length]
 
         return message
 
@@ -103,11 +101,10 @@ class String0Descriptor(BaseDescriptor):
     """
     TYPE = DescriptorTypes.STRING
 
-    def __init__(self, languages, max_length=None):
+    def __init__(self, languages):
         self.languages = languages
-        self.max_length = max_length
 
-    def pack(self):
+    def pack(self, max_length=None):
         message = b''
         length = 2 + 2 * len(self.languages)
 
@@ -117,8 +114,8 @@ class String0Descriptor(BaseDescriptor):
         for language_code in self.languages:
             message += struct.pack('<H', language_code)
 
-        if self.max_length:
-            return message[:self.max_length]
+        if max_length:
+            return message[:max_length]
 
         return message
 
@@ -126,14 +123,13 @@ class String0Descriptor(BaseDescriptor):
 class StringDescriptor(BaseDescriptor):
     TYPE = DescriptorTypes.STRING
 
-    def __init__(self, string, max_length=None):
+    def __init__(self, string):
         self.string = string
-        self.max_length = max_length
 
-    def pack(self):
+    def pack(self, max_length=None):
         string = self.string.encode('utf-16')[2:]
         length = len(string) + 2
-        if self.max_length and self.max_length < length:
+        if max_length and max_length < length:
             length = self.max_length
 
         message = b''
@@ -141,8 +137,8 @@ class StringDescriptor(BaseDescriptor):
         message += struct.pack('<B', DescriptorTypes.STRING.value)
         message += string
 
-        if self.max_length:
-            return message[:self.max_length]
+        if max_length:
+            return message[:max_length]
 
         return message
 
@@ -174,3 +170,30 @@ class EndpointDescriptor(BaseDescriptor):
         (2, 'wMaxPacketSize'),
         (1, 'bInterval')
     ]
+
+
+class MaxSize:
+    """
+    Wrapper around a descriptor, so that pack() doesn't require an argument.
+    """
+
+    def __init__(self, descriptor, max_size):
+        self.descriptor = descriptor
+        self.max_size = max_size
+
+    def pack(self):
+        res = b''
+        if not self.descriptor:
+            return res
+
+        if isinstance(self.descriptor, BaseDescriptor):
+            return self.descriptor.pack(self.max_size)
+
+        if isinstance(self.descriptor, list):
+            for descriptor in self.descriptor:
+                res += descriptor.pack()
+
+            if self.max_size:
+                res = res[:self.max_size]
+
+        return res

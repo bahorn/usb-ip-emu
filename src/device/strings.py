@@ -27,12 +27,12 @@ class Strings:
         """
         self.languages[language] = strings
 
-    def descriptor(self, index, language, length):
+    def descriptor(self, index, language):
         """
         Return a descriptor for the given string
         """
         if index == 0 and language == 0:
             # just return the String0Descriptor
-            return String0Descriptor(self.languages.keys(), length)
+            return String0Descriptor(self.languages.keys())
 
-        return StringDescriptor(self.languages[language][index - 1], length)
+        return StringDescriptor(self.languages[language][index - 1])

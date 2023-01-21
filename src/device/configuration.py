@@ -35,7 +35,7 @@ class Configuration:
 
         return resp
 
-    def descriptor(self, max_length=None):
+    def descriptor(self):
         """
         Get a descriptor for this configuration
         """
@@ -47,7 +47,8 @@ class Configuration:
         for interface in self.interfaces:
             total_length += 7 * len(interface.endpoints())
 
-        return ConfigurationDescriptor(
+        reply = []
+        reply.append(ConfigurationDescriptor(
             {
                 'wTotalLength': total_length,
                 'bNumInterfaces': len(self.interfaces),
@@ -55,6 +56,9 @@ class Configuration:
                 'iConfiguration': self._name_idx,
                 'bmAttributes': int.from_bytes(self.attributes(), 'little'),
                 'bMaxPower': self._max_power
-            },
-            max_length
-        )
+            }
+        ))
+        for interface in self.interfaces:
+            reply.append(interface.descriptor())
+
+        return reply

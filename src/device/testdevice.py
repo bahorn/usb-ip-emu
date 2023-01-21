@@ -6,8 +6,8 @@ class TestDevice(BaseDevice):
     """
     Device for testing this implementation.
     """
-    VID = 0x1038
-    PID = 0x150d
+    VID = 0x1337
+    PID = 0x1234
 
     def __init__(self):
         config = {

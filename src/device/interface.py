@@ -9,8 +9,8 @@ class Interface:
     Class representing an interface.
     """
 
-    def __init__(self, interface_number, if_class, if_subclass, if_protocol,
-                 alternate_setting=0, name_idx=0):
+    def __init__(self, interface_number, if_class=0x00, if_subclass=0x00,
+                 if_protocol=0x00, alternate_setting=0, name_idx=0):
         self._interface_number = interface_number
         self._if_class = if_class
         self._if_subclass = if_subclass
@@ -31,7 +31,7 @@ class Interface:
     def endpoints(self):
         return self._endpoints
 
-    def descriptor(self, max_length=None):
+    def descriptor(self):
         """
         Return a descriptor for this interface.
         """
@@ -44,6 +44,5 @@ class Interface:
                 'bInterfaceSubClass': self._if_subclass,
                 'bInterfaceProtocol': self._if_protocol,
                 'iInterface': self._name_idx
-            },
-            max_length
+            }
         )

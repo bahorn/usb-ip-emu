@@ -48,7 +48,7 @@ class Endpoint:
 
         return resp
 
-    def descriptor(self, max_length):
+    def descriptor(self):
         """
         Return an endpoint descriptor for this endpoint.
         """

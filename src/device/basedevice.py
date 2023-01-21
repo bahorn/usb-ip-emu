@@ -2,12 +2,15 @@
 Base device to inherit from.
 """
 from .configuration import Configuration
+from .interface import Interface
 from .strings import Strings, Languages
 from .descriptors import \
         DeviceDescriptor, \
         DescriptorTypes, \
-        USBVersions
-from .setup import process_USB_setup, \
+        USBVersions, \
+        MaxSize
+from .setup import \
+        process_USB_setup, \
         DeviceGetStatus, \
         DeviceClearFeature, \
         DeviceSetFeature, \
@@ -28,10 +31,15 @@ class BaseDevice:
     def __init__(self, settings, interfaces):
         self.settings = settings
         self._interfaces = interfaces
-        self._configurations = [Configuration(1)]
+
+        interface1 = Interface(0, name_idx=2)
+        config1 = Configuration(1)
+        config1.add_interface(interface1)
+
+        self._configurations = [config1]
         self._strings = Strings([Languages.ENGLISH_US.value])
         self._strings.set_strings(
-                Languages.ENGLISH_US.value, ['Hello world', 'Hello world']
+                Languages.ENGLISH_US.value, ['Hello world1', 'Hello world2']
             )
 
         self._active_configuration = 1
@@ -85,30 +93,32 @@ class BaseDevice:
         setup = process_USB_setup(packet.setup)
         print(setup)
 
+        result = None
+
         match setup:
             # Default Device Requests
             case _ if isinstance(setup, DeviceGetStatus):
-                return self.get_status(setup)
+                result = self.get_status(setup)
             case _ if isinstance(setup, DeviceClearFeature):
-                return self.clear_feature(setup)
+                result = self.clear_feature(setup)
             case _ if isinstance(setup, DeviceSetFeature):
-                return self.set_feature(setup)
+                result = self.set_feature(setup)
             case _ if isinstance(setup, DeviceSetAddress):
-                return self.set_address(setup)
+                result = self.set_address(setup)
             case _ if isinstance(setup, DeviceGetDescriptor):
-                return self.get_discriptor(setup)
+                result = self.get_discriptor(setup)
             case _ if isinstance(setup, DeviceSetDescriptor):
-                return self.set_descriptor(setup)
+                result = self.set_descriptor(setup)
             case _ if isinstance(setup, DeviceGetConfiguration):
-                return self.get_configuration(setup)
+                result = self.get_configuration(setup)
             case _ if isinstance(setup, DeviceSetConfiguration):
-                return self.set_configuration(setup)
+                result = self.set_configuration(setup)
             case _:
                 print('unhandled message type!')
 
-        return None
+        return MaxSize(result, setup.wLength())
 
-    def descriptor(self, max_length):
+    def descriptor(self):
         return DeviceDescriptor(
             {
                 'bcdUSB': USBVersions.USB_2_0,
@@ -123,17 +133,14 @@ class BaseDevice:
                 'iProduct': 0,
                 'iSerialNumber': 0,
                 'bNumConfigurations': self.bNumConfigurations()
-            },
-            max_length
+            }
         )
 
-    def configuration(self, configuration_idx, max_length):
-        return self._configurations[configuration_idx - 1].descriptor(
-                max_length
-        )
+    def configuration(self, configuration_idx):
+        return self._configurations[configuration_idx - 1].descriptor()
 
-    def strings(self, string_idx, language, max_length):
-        return self._strings.descriptor(string_idx, language, max_length)
+    def strings(self, string_idx, language):
+        return self._strings.descriptor(string_idx, language)
 
     # Implementations of standard device requests.
 
@@ -157,23 +164,16 @@ class BaseDevice:
     def get_discriptor(self, setup):
         match setup.descriptor_type():
             case DescriptorTypes.DEVICE:
-                print(
-                        setup.descriptor_type(),
-                        setup.descriptor_length(),
-                        setup.language_id()
-                    )
-                return self.descriptor(setup.descriptor_length())
+                return self.descriptor()
             case DescriptorTypes.CONFIGURATION:
                 print('configuration!')
                 return self.configuration(
-                            setup.descriptor_index(),
-                            setup.descriptor_length()
+                            setup.descriptor_index()
                         )
             case DescriptorTypes.STRING:
                 return self.strings(
                         setup.descriptor_index(),
-                        setup.language_id(),
-                        setup.descriptor_length()
+                        setup.language_id()
                     )
             case DescriptorTypes.INTERFACE:
                 print('interface')
