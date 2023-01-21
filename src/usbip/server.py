@@ -99,6 +99,10 @@ class USBIP(Protocol):
                                     res.seqnum, 0, response.pack()
                                 ).pack()
                         )
+                    else:
+                        self.transport.write(
+                                USBIPRetSubmit(res.seqnum, 0, b'').pack()
+                        )
                 case USBIPCmd.USBIP_CMD_UNLINK:
                     return self.transport.write(
                             USBIPRetUnlink(res.unlink_seqnum[0], 0).pack()

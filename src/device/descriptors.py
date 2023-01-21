@@ -2,6 +2,7 @@
 Classes implementing various USB descriptors.
 """
 import struct
+import copy
 
 from enum import Enum
 
@@ -27,22 +28,42 @@ class DescriptorTypes(Enum):
 
 
 class BaseDescriptor:
-    def __init__(self, data):
-        self.data = data
+    def __init__(self, data, max_length=None):
+        # self.configurations = configurations
+        data_fixed = copy.deepcopy(data)
+
+        # Compute the max size, in case this needs bLength
+        bLength = sum(i for i, _ in self.ORDER)
+        if 'bLength' not in data_fixed:
+            data_fixed['bLength'] = bLength
+
+        if max_length and data_fixed['bLength'] > max_length:
+            data_fixed['bLength'] = max_length
+
+        if 'bDescriptorType' not in data_fixed:
+            data_fixed['bDescriptorType'] = self.TYPE.value
+
+        self.data = data_fixed
+        self.max_length = max_length
 
     def pack(self):
         message = b''
         for size, key in self.ORDER:
             match size:
                 case 1:
-                    message += struct.pack('>B', self.data[key])
+                    message += struct.pack('<B', self.data[key])
                 case 2:
-                    message += struct.pack('>H', self.data[key])
+                    message += struct.pack('<H', self.data[key])
+
+        if self.max_length:
+            message = message[:self.max_length]
 
         return message
 
 
 class DeviceDescriptor(BaseDescriptor):
+    TYPE = DescriptorTypes.DEVICE
+
     ORDER = [
         (1, 'bLength'),
         (1, 'bDescriptorType'),
@@ -55,16 +76,15 @@ class DeviceDescriptor(BaseDescriptor):
         (2, 'idProduct'),
         (2, 'bcdDevice'),
         (1, 'iManufacturer'),
+        (1, 'iProduct'),
         (1, 'iSerialNumber'),
         (1, 'bNumConfigurations')
     ]
 
-    def __init__(self, data):
-        # self.configurations = configurations
-        super().__init__(data)
-
 
 class ConfigurationDescriptor(BaseDescriptor):
+    TYPE = DescriptorTypes.CONFIGURATION
+
     ORDER = [
         (1, 'bLength'),
         (1, 'bDescriptorType'),
@@ -76,50 +96,60 @@ class ConfigurationDescriptor(BaseDescriptor):
         (1, 'bMaxPower')
     ]
 
-    def __init__(self, interfaces):
-        self.interfaces = interfaces
-        super().__init__()
-
-    def pack(self):
-        message = b''
-
-        return message
-
 
 class String0Descriptor(BaseDescriptor):
     """
     String descriptor at index 0 returns a list of all the supported languages.
     """
+    TYPE = DescriptorTypes.STRING
 
-    def __init__(self, languages):
-        self.languages = []
-        super().__init__()
+    def __init__(self, languages, max_length=None):
+        self.languages = languages
+        self.max_length = max_length
 
     def pack(self):
         message = b''
-        length = 0
+        length = 2 + 2 * len(self.languages)
 
-        message += struct.pack('>B', length)
-        message += struct.pack('>B', DescriptorTypes.STRING.value)
+        message += struct.pack('<B', length)
+        message += struct.pack('<B', DescriptorTypes.STRING.value)
+
         for language_code in self.languages:
-            message += struct.pack('>H', language_code)
+            message += struct.pack('<H', language_code)
+
+        if self.max_length:
+            return message[:self.max_length]
+
         return message
 
 
 class StringDescriptor(BaseDescriptor):
-    def __init__(self, string):
-        super().__init__()
+    TYPE = DescriptorTypes.STRING
+
+    def __init__(self, string, max_length=None):
         self.string = string
+        self.max_length = max_length
 
     def pack(self):
+        string = self.string.encode('utf-16')[2:]
+        length = len(string) + 2
+        if self.max_length and self.max_length < length:
+            length = self.max_length
+
         message = b''
-        message += struct.pack('>B', len(self.string))
-        message += struct.pack('>B', DescriptorTypes.STRING.value)
-        message += bytes(self.string, 'ascii')
+        message += struct.pack('<B', length)
+        message += struct.pack('<B', DescriptorTypes.STRING.value)
+        message += string
+
+        if self.max_length:
+            return message[:self.max_length]
+
         return message
 
 
 class InterfaceDescriptor(BaseDescriptor):
+    TYPE = DescriptorTypes.INTERFACE
+
     ORDER = [
         (1, 'bLength'),
         (1, 'bDescriptorType'),
@@ -132,18 +162,10 @@ class InterfaceDescriptor(BaseDescriptor):
         (1, 'iInterface')
     ]
 
-    def __init__(self, endpoints):
-        self.endpoints = []
-        super().__init__()
-
-    def pack(self):
-        message = super().pack()
-        for endpoint in self.endpoints:
-            message += EndpointDescriptor(endpoint).pack()
-        return message
-
 
 class EndpointDescriptor(BaseDescriptor):
+    TYPE = DescriptorTypes.ENDPOINT
+
     ORDER = [
         (1, 'bLength'),
         (1, 'bDescriptorType'),
@@ -152,10 +174,3 @@ class EndpointDescriptor(BaseDescriptor):
         (2, 'wMaxPacketSize'),
         (1, 'bInterval')
     ]
-
-    def __init__(self, data):
-        self.data = data
-        self.data['bLength'] = 7
-        self.data['bDescriptorType'] = DescriptorTypes.ENDPOINT.value
-        # device needs to define the res.
-        super().__init__()

@@ -1,6 +1,7 @@
 import struct
 from enum import Enum
-from .basedevice import StandardRequestID as Request
+from .request import StandardRequestID as Request
+from .descriptors import DescriptorTypes
 
 
 class Recipient(Enum):
@@ -48,7 +49,7 @@ class USBSetup:
 
     def __init__(self, setup_data):
         bmRequestType, bRequest, wValue, wIndex, wLength \
-                = struct.unpack('>BBHHH', setup_data)
+                = struct.unpack('<BBHHH', setup_data)
         self._bmRequestType = bmRequestType
         self._bRequest = Request(bRequest)
         self._wValue = wValue
@@ -76,6 +77,7 @@ class USBSetup:
         Check if the setup data and data matches.
         """
         if bmRequestType:
+            print(bmRequestType, self.bmRequestType())
             if self.bmRequestType() != bmRequestType:
                 return False
 
@@ -125,6 +127,14 @@ class DeviceSetAddress(DeviceRequest):
 
 
 class DeviceGetDescriptor(DeviceRequest):
+    def descriptor_type(self):
+        return DescriptorTypes(
+                    self.wValue().to_bytes(2, byteorder='little')[1]
+                )
+
+    def descriptor_index(self):
+        return self.wValue().to_bytes(2, byteorder='little')[0]
+
     def language_id(self):
         return self.wIndex()
 

@@ -145,10 +145,10 @@ class USBIPRetSubmit:
         # start_frame
         message += struct.pack('>I', 0)
         # number_of_packets
-        message += struct.pack('>I', 0xffffffff)
+        message += struct.pack('>I', 0) #0xffffffff)
         # error count
         message += struct.pack('>I', 0)
-        # padding
+        # setup padding
         message += b'\x00'*8
         # transfer buffer
         message += self.data
