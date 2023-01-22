@@ -60,5 +60,8 @@ class Configuration:
         ))
         for interface in self.interfaces:
             reply.append(interface.descriptor())
+            # now get the endpoints.
+            for endpoint in interface.endpoints():
+                reply.append(endpoint.descriptor())
 
         return reply

@@ -1,5 +1,5 @@
 from .basedevice import BaseDevice
-from .speed import USBSpeed
+from .enum import USBSpeed
 
 
 class TestDevice(BaseDevice):

@@ -7,7 +7,6 @@ from .strings import Strings, Languages
 from .descriptors import \
         DeviceDescriptor, \
         DescriptorTypes, \
-        USBVersions, \
         MaxSize
 from .setup import \
         process_USB_setup, \
@@ -19,6 +18,8 @@ from .setup import \
         DeviceSetDescriptor, \
         DeviceGetConfiguration, \
         DeviceSetConfiguration
+
+from .enum import USBVersions
 
 
 class BaseDevice:
@@ -121,7 +122,7 @@ class BaseDevice:
     def descriptor(self):
         return DeviceDescriptor(
             {
-                'bcdUSB': USBVersions.USB_2_0,
+                'bcdUSB': USBVersions.USB_2_0.value,
                 'bDeviceClass': self.bDeviceClass(),
                 'bDeviceSubClass': self.bDeviceSubClass(),
                 'bDeviceProtocol': self.bDeviceProtocol(),
