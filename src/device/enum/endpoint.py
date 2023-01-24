@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class TransferType(Enum):
     CONTROL = (0, 0)
     ISOCHRONOUS = (0, 1)

@@ -5,6 +5,8 @@ import logging
 import click
 
 from commands.server import server
+from commands.pcap import pcap
+from commands.emulate import emulate
 
 logging.basicConfig(
     format='[%(asctime)s] %(message)s',
@@ -18,6 +20,9 @@ def main():
 
 
 main.add_command(server)
+main.add_command(pcap)
+main.add_command(emulate)
+
 
 if __name__ == "__main__":
     main()

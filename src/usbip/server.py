@@ -49,8 +49,6 @@ class USBIP(Protocol):
             case USBIPState.USBIP:
                 self.command(data)
 
-        # logging.error(e)
-
     def operation(self, data):
         message = USBIPClientMessage(data)
         match message.cc:
@@ -64,11 +62,12 @@ class USBIP(Protocol):
             case USBIPCommands.OP_REQ_IMPORT:
                 logging.info(f'importing {message.busid}')
                 busid = str(message.busid)
-                print(busid, type(busid))
+
+                busid_ = tuple(map(int, busid.split('-')))
 
                 # if the device exists, we can transisition over to
                 # the usbip case and process those packets.
-                self.device = self.devlist.lookup(busid)
+                self.device = self.devlist.lookup(busid_)
                 # now send a message based on if this device lookup was
                 # succesful.
                 reply = USBIPReplyImport(busid, self.device)
@@ -87,7 +86,7 @@ class USBIP(Protocol):
             return
         res = process_message(data)
         if res:
-            print(vars(res))
+            # print(vars(res))
             match res.command:
                 case USBIPCmd.USBIP_CMD_SUBMIT:
                     # now let the device process the message
@@ -100,9 +99,10 @@ class USBIP(Protocol):
                                 ).pack()
                         )
                     else:
-                        self.transport.write(
-                                USBIPRetSubmit(res.seqnum, 0, b'').pack()
-                        )
+                        pass
+                        #self.transport.write(
+                        #        USBIPRetSubmit(res.seqnum, 0, b'').pack()
+                        #)
                 case USBIPCmd.USBIP_CMD_UNLINK:
                     return self.transport.write(
                             USBIPRetUnlink(res.unlink_seqnum[0], 0).pack()

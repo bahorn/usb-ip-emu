@@ -1,9 +1,6 @@
 """
 Base device to inherit from.
 """
-from .configuration import Configuration
-from .interface import Interface
-from .strings import Strings, Languages
 from .descriptors import \
         DeviceDescriptor, \
         DescriptorTypes, \
@@ -20,6 +17,7 @@ from .setup import \
         DeviceSetConfiguration
 
 from .enum import USBVersions
+from .enum import USBSpeed
 
 
 class BaseDevice:
@@ -28,31 +26,19 @@ class BaseDevice:
 
     It takes a dictionary for each of the settings.
     """
+    _configurations = []
+    _strings = []
+    _active_configuration = 0
+    _interfaces = []
 
-    def __init__(self, settings, interfaces):
+    def __init__(self, settings):
         self.settings = settings
-        self._interfaces = interfaces
 
-        interface1 = Interface(0, name_idx=2)
-        config1 = Configuration(1)
-        config1.add_interface(interface1)
-
-        self._configurations = [config1]
-        self._strings = Strings([Languages.ENGLISH_US.value])
-        self._strings.set_strings(
-                Languages.ENGLISH_US.value, ['Hello world1', 'Hello world2']
-            )
-
-        self._active_configuration = 1
-
-    def busnum(self):
-        return self.settings['busnum']
-
-    def devnum(self):
-        return self.settings['devnum']
+        if 'bConfigurationValue' in self.settings:
+            self._active_configuration = self.settings['bConfigurationValue']
 
     def speed(self):
-        return self.settings['speed']
+        return USBSpeed.HIGH_SPEED.value
 
     def idVendor(self):
         return self.settings['idVendor']
@@ -73,13 +59,33 @@ class BaseDevice:
         return self.settings['bDeviceProtocol']
 
     def bConfigurationValue(self):
-        return self.settings['bConfigurationValue']
+        return self.settings.get(
+                'bConfigurationValue',
+                self._active_configuration
+            )
 
     def bNumConfigurations(self):
-        return self.settings['bNumConfigurations']
+        return self.settings.get(
+                'bNumConfigurations', len(self._configurations)
+            )
+
+    def bcdUSB(self):
+        return self.settings.get('bcdUSB', USBVersions.USB_2_0.value)
+
+    def bMaxPacketSize(self):
+        return self.settings.get('bMaxPacketSize', 64)
 
     def bNumInterfaces(self):
         return len(self._interfaces)
+
+    def iManufacturer(self):
+        return self.settings.get('iManufacturer', 0)
+
+    def iProduct(self):
+        return self.settings.get('iProduct', 0)
+
+    def iSerialNumber(self):
+        return self.settings.get('iSerialNumber', 0)
 
     def interfaces(self):
         return self._interfaces
@@ -92,9 +98,9 @@ class BaseDevice:
         Process an URB for this device.
         """
         setup = process_USB_setup(packet.setup)
-        print(setup)
 
         result = None
+        handled = True
 
         match setup:
             # Default Device Requests
@@ -115,30 +121,34 @@ class BaseDevice:
             case _ if isinstance(setup, DeviceSetConfiguration):
                 result = self.set_configuration(setup)
             case _:
-                print('unhandled message type!')
+                handled = False
 
-        return MaxSize(result, setup.wLength())
+        if handled:
+            return MaxSize(result, setup.wLength())
+
+        return self.message_handler(packet)
+
 
     def descriptor(self):
         return DeviceDescriptor(
             {
-                'bcdUSB': USBVersions.USB_2_0.value,
+                'bcdUSB': self.bcdUSB(),
                 'bDeviceClass': self.bDeviceClass(),
                 'bDeviceSubClass': self.bDeviceSubClass(),
                 'bDeviceProtocol': self.bDeviceProtocol(),
-                'bMaxPacketSize': 64,
+                'bMaxPacketSize': self.bMaxPacketSize(),
                 'idVendor': self.idVendor(),
                 'idProduct': self.idProduct(),
                 'bcdDevice': self.bcdDevice(),
-                'iManufacturer': 1,
-                'iProduct': 0,
-                'iSerialNumber': 0,
+                'iManufacturer': self.iManufacturer(),
+                'iProduct': self.iProduct(),
+                'iSerialNumber': self.iSerialNumber(),
                 'bNumConfigurations': self.bNumConfigurations()
             }
         )
 
     def configuration(self, configuration_idx):
-        return self._configurations[configuration_idx - 1].descriptor()
+        return self._configurations[configuration_idx].descriptor()
 
     def strings(self, string_idx, language):
         return self._strings.descriptor(string_idx, language)
@@ -199,3 +209,9 @@ class BaseDevice:
         Unknown setup command!
         """
         print('unknown setup command')
+
+    def message_handler(self, packet):
+        """
+        Unknown packet
+        """
+        return MaxSize(None, 0)

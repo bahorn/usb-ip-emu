@@ -4,9 +4,13 @@ Uses USB/IP to allow you to write emulate USB devices.
 Either custom or based off packet captures, for the purpose of reverse
 engineering or debugging.
 
-Name is from the Lore in Mike Pondsmith's Cyberpunk, where the SoulKiller is a
+Early stages, primary 
+
+Name is from the lore in Mike Pondsmith's Cyberpunk, where the SoulKiller is a
 program that copies someones mind. (Which I thought fit with copying USB
 devices!)
+
+[Video of it in action](https://www.youtube.com/watch?v=GsFO1ZnthBA)
 
 ## Usage
 
@@ -20,8 +24,11 @@ poetry install
 Then run the server with:
 
 ```
-poetry run python3 src/cli server
+poetry run python3 src/cli emulate ./packet-capture-1.pcapng ./packet-capture-2.pcapng
 ```
+
+(Currently needs to be usbmon captures from linux, not USBpcap that you find on
+windows)
 
 ### Connecting a Ubuntu Machine to this
 

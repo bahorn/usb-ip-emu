@@ -1,7 +1,7 @@
 from .base import BaseDescriptor
 
 
-class MaxSize:
+class MaxSize(BaseDescriptor):
     """
     Wrapper around a descriptor, so that pack() doesn't require an argument.
     """

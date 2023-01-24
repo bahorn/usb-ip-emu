@@ -19,6 +19,9 @@ class Interface:
         self._name_idx = name_idx
         self._endpoints = []
 
+    def add_endpoints(self, endpoints):
+        self._endpoints = endpoints
+
     def bInterfaceClass(self):
         return self.if_class
 

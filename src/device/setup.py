@@ -52,7 +52,6 @@ class USBSetup:
         Check if the setup data and data matches.
         """
         if bmRequestType:
-            print(bmRequestType, self.bmRequestType())
             if self.bmRequestType() != bmRequestType:
                 return False
 

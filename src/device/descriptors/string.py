@@ -33,7 +33,10 @@ class StringDescriptor(BaseDescriptor):
     TYPE = DescriptorTypes.STRING
 
     def __init__(self, string):
-        self.string = string
+        if isinstance(string, tuple):
+            self.string = string[1]
+        else:
+            self.string = string
 
     def pack(self, max_length=None):
         string = self.string.encode('utf-16')[2:]

@@ -4,3 +4,4 @@ from .endpoint import *
 from .interface import *
 from .maxsize import *
 from .string import *
+from .fixed import *

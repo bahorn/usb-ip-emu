@@ -71,8 +71,9 @@ class USBIPReplyDevlist:
         message += struct.pack('>I', 0x00)
         message += struct.pack('>I', len(self.devlist.devices()))
 
-        for busid in self.devlist.devices():
-            device = self.devlist.lookup(busid)
+        for (busnum, devnum) in self.devlist.devices():
+            busid = f'{busnum}-{devnum}'
+            device = self.devlist.lookup((busnum, devnum))
             device_info = b''
             # fake a path, as we are dealing with virtual devices.
             device_info += struct.pack(
@@ -80,8 +81,8 @@ class USBIPReplyDevlist:
                     bytes(fake_path(busid), 'ascii')
             )
             device_info += struct.pack('32s', bytes(busid, 'ascii'))
-            device_info += struct.pack('>I', device.busnum())
-            device_info += struct.pack('>I', device.devnum())
+            device_info += struct.pack('>I', busnum)
+            device_info += struct.pack('>I', devnum)
             device_info += struct.pack('>I', device.speed())
             device_info += struct.pack('>H', device.idVendor())
             device_info += struct.pack('>H', device.idProduct())
@@ -119,6 +120,7 @@ class USBIPReplyImport:
     def __init__(self, busid, device):
         self.device = device
         self.busid = busid
+        self.busnum, self.devnum = tuple(map(int, busid.split('-')))
 
     def pack(self):
         message = b''
@@ -137,8 +139,8 @@ class USBIPReplyImport:
                 bytes(fake_path(self.busid), 'ascii')
         )
         device_info += struct.pack('32s', bytes(self.busid, 'ascii'))
-        device_info += struct.pack('>I', self.device.busnum())
-        device_info += struct.pack('>I', self.device.devnum())
+        device_info += struct.pack('>I', self.busnum)
+        device_info += struct.pack('>I', self.devnum)
         device_info += struct.pack('>I', self.device.speed())
         device_info += struct.pack('>H', self.device.idVendor())
         device_info += struct.pack('>H', self.device.idProduct())

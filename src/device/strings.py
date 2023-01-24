@@ -18,14 +18,24 @@ class Strings:
     Manage the strings in a device.
     """
 
-    def __init__(self, languages):
-        self.languages = {language: [] for language in languages}
+    def __init__(self, setting):
+        if isinstance(setting, list):
+            self.languages = {language: {} for language in setting}
+        else:
+            self.languages = setting
 
     def set_strings(self, language, strings):
         """
         Update the strings stored for a language.
         """
-        self.languages[language] = strings
+        active = {}
+        if isinstance(active, list):
+            for idx, string in enumerate(strings):
+                active[idx + 1] = string
+        else:
+            active = strings
+
+        self.languages[language] = active
 
     def descriptor(self, index, language):
         """
@@ -35,4 +45,7 @@ class Strings:
             # just return the String0Descriptor
             return String0Descriptor(self.languages.keys())
 
-        return StringDescriptor(self.languages[language][index - 1])
+        if index not in self.languages[language]:
+            return StringDescriptor('Unknown')
+
+        return StringDescriptor(self.languages[language][index])

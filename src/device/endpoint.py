@@ -4,11 +4,15 @@ Endpoint
 from bitarray import bitarray
 
 from .descriptors import EndpointDescriptor
+from .enum import TransferType, SynchronisationType, UsageType
 
 
 class Endpoint:
-    def __init__(self, address, max_packet_size, interval, transfer_type,
-                 synchronisation_type, usage_type):
+    def __init__(self, address, max_packet_size, interval,
+                 transfer_type=TransferType.CONTROL,
+                 synchronisation_type=SynchronisationType.NO_SYNCHRONISATION,
+                 usage_type=UsageType.DATA_ENDPOINT):
+
         self._address = address
         self._max_packet_size = max_packet_size
         self._interval = interval
@@ -19,10 +23,11 @@ class Endpoint:
     def attributes(self):
         resp = bitarray()
 
-        resp.append(self._transfer_type.value)
-        resp.append(self._synchronisation_type.value)
-        resp.append(self._usage_type.value)
-        resp.append([0, 0])
+        # this might need fixing when actually implementing ISO transfers.
+        resp += [0, 0]
+        resp += self._usage_type.value
+        resp += self._synchronisation_type.value
+        resp += self._transfer_type.value
 
         return resp
 

@@ -117,7 +117,6 @@ class USBIPCmdSubmit(USBIPHeaderBasic):
             self.setup = setup_message
             self.transfer_buffer = transfer_buffer
             self.iso_packets = iso_packets
-            print(self.transfer_flags)
 
         except struct.error:
             raise ParseError('Unable to unpack USBIP_CMD_SUBMIT')
@@ -145,7 +144,7 @@ class USBIPRetSubmit:
         # start_frame
         message += struct.pack('>I', 0)
         # number_of_packets
-        message += struct.pack('>I', 0) #0xffffffff)
+        message += struct.pack('>I', 0) # 0xffffffff
         # error count
         message += struct.pack('>I', 0)
         # setup padding
@@ -202,7 +201,6 @@ def process_message(message):
             res = USBIPCmdSubmit(message)
         case USBIPCmd.USBIP_CMD_UNLINK:
             res = USBIPCmdUnlink(message)
-            pass
         case _:
             pass
     return res
