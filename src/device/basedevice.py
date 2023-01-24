@@ -128,7 +128,6 @@ class BaseDevice:
 
         return self.message_handler(packet)
 
-
     def descriptor(self):
         return DeviceDescriptor(
             {
@@ -157,19 +156,31 @@ class BaseDevice:
 
     # GET_STATUS
     def get_status(self, setup):
-        pass
+        """
+        Not implemented yet
+        """
+        return None
 
     # CLEAR_FEATURE
     def clear_feature(self, setup):
-        pass
+        """
+        Not implemented yet
+        """
+        return None
 
     # SET_FEATURE
     def set_feature(self, setup):
-        pass
+        """
+        Not implemented yet
+        """
+        return None
 
     # SET_ADDRESS
     def set_address(self, setup):
-        pass
+        """
+        Not implemented yet
+        """
+        return None
 
     # GET_DESCRIPTOR
     def get_discriptor(self, setup):
@@ -177,7 +188,6 @@ class BaseDevice:
             case DescriptorTypes.DEVICE:
                 return self.descriptor()
             case DescriptorTypes.CONFIGURATION:
-                print('configuration!')
                 return self.configuration(
                             setup.descriptor_index()
                         )
@@ -187,16 +197,24 @@ class BaseDevice:
                         setup.language_id()
                     )
             case DescriptorTypes.INTERFACE:
-                print('interface')
+                # Not yet implemented
+                return None
             case DescriptorTypes.ENDPOINT:
-                print('endpoint')
+                # Not yet implemented
+                return None
 
     # SET_DESCRIPTOR
     def set_descriptor(self, setup):
-        pass
+        """
+        Not implemented yet
+        """
+        return None
 
     # GET_CONFIGURATION
     def get_configuration(self, setup):
+        """
+        Not implemented yet
+        """
         return None
 
     # SET_CONFIGURATION
@@ -209,9 +227,11 @@ class BaseDevice:
         Unknown setup command!
         """
         print('unknown setup command')
+        return None
 
     def message_handler(self, packet):
         """
-        Unknown packet
+        Unknown packet, clases inheriting from this should replace it with one
+        that handles the specific device it is implementing.
         """
         return MaxSize(None, 0)

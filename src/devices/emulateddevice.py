@@ -51,7 +51,7 @@ class EmulatedDevice(BaseDevice):
         cp = ComparePackets()
 
         def score_function(pair):
-            if pair['C'] is None or pair['S'] is None:
+            if pair['S'] is None:
                 return (False, 0)
 
             ps = pair['S']
@@ -69,5 +69,10 @@ class EmulatedDevice(BaseDevice):
         # nothing close, just return nothing
         if len(res) == 0:
             return MaxSize(None, 0)
+
+        best = res[0]
+
+        if not best[1]['C']:
+            return None
 
         return FixedDescriptor(bytes(res[0][1]['C'].payload))
