@@ -4,7 +4,8 @@ Uses USB/IP to allow you to write emulate USB devices.
 Either custom or based off packet captures, for the purpose of reverse
 engineering or debugging.
 
-Early stages, primary 
+Very early stages, only emulation works right now, which limitations.
+(Don't expect isochronous transfers, etc)
 
 Name is from the lore in Mike Pondsmith's Cyberpunk, where the SoulKiller is a
 program that copies someones mind. (Which I thought fit with copying USB
