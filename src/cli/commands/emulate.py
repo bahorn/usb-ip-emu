@@ -20,6 +20,7 @@ def emulate(host, port, pcaps):
     for pcap in pcaps:
         if not os.path.isdir(pcap):
             pcaps_.append(pcap)
+            continue
 
         for result in os.listdir(pcap):
             pcaps_.append(os.path.join(pcap, result))

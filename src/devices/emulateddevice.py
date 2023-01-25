@@ -1,3 +1,5 @@
+import logging
+
 from device.basedevice import BaseDevice
 from device.strings import Strings
 from device.descriptors import FixedDescriptor, MaxSize
@@ -68,11 +70,17 @@ class EmulatedDevice(BaseDevice):
 
         # nothing close, just return nothing
         if len(res) == 0:
+            logging.info('No similar messages seen, giving empty reply')
             return MaxSize(None, 0)
 
         best = res[0]
 
+        if best[0] == 0:
+            logging.info('Seen message before, replying same way')
+        else:
+            logging.info(f'New message, replying with closest ({best[0]})')
+
         if not best[1]['C']:
             return None
 
-        return FixedDescriptor(bytes(res[0][1]['C'].payload))
+        return FixedDescriptor(bytes(best[1]['C'].payload))

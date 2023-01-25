@@ -86,7 +86,6 @@ class USBIP(Protocol):
             return
         res = process_message(data)
         if res:
-            # print(vars(res))
             match res.command:
                 case USBIPCmd.USBIP_CMD_SUBMIT:
                     # now let the device process the message
@@ -98,9 +97,6 @@ class USBIP(Protocol):
                                     res.seqnum, 0, response.pack()
                                 ).pack()
                         )
-                        # self.transport.write(
-                        #        USBIPRetSubmit(res.seqnum, 0, b'').pack()
-                        # )
                 case USBIPCmd.USBIP_CMD_UNLINK:
                     return self.transport.write(
                             USBIPRetUnlink(res.unlink_seqnum[0], 0).pack()
