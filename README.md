@@ -1,10 +1,10 @@
 # USB Soulkiller
 
-Uses USB/IP to allow you to write emulate USB devices.
+Uses USB/IP to allow you to emulate / clone USB devices.
 Either custom or based off packet captures, for the purpose of reverse
 engineering or debugging.
 
-Very early stages, only emulation works right now, which limitations.
+Very early stages, only emulation works right now, with limitations.
 (Don't expect isochronous transfers, etc)
 
 Name is from the lore in Mike Pondsmith's Cyberpunk, where the SoulKiller is a
@@ -33,7 +33,7 @@ windows)
 
 ### Connecting a Ubuntu Machine to this
 
-Setup USB/IP;
+Setup USB/IP:
 ```
 sudo apt install linux-tools-generic linux-tools-`uname -r`
 sudo modprobe vhci-hcd
