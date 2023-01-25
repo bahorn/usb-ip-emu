@@ -1,4 +1,8 @@
-from .usbmon import USBmon, SetupPacket, StringDescriptor, DeviceDescriptor
+from protocol.usbmon import \
+        USBmon, \
+        SetupPacket, \
+        StringDescriptor, \
+        DeviceDescriptor
 from scapy.all import rdpcap
 
 
