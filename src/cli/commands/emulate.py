@@ -38,7 +38,7 @@ def pre_response(packet):
     windex = hex_pad(packet.setup.wIndex())
     wlength = packet.setup.wLength()
     name = packet.setup.__class__.__name__
-    tim.print(f'[@primary #auto] ENDPOINT {packet.endpoint} ')
+    tim.print(f'[@primary #auto bold] ENDPOINT {packet.endpoint} ')
     tim.print(
         ''.join([
             '[@secondary #auto bold] SETUP ',
@@ -50,7 +50,7 @@ def pre_response(packet):
     )
     if packet.payload:
         payload = hexdump(packet.payload)
-        tim.print(f'[@tertiary #auto bold] PAYLOAD ({len(packet.payload)})')
+        tim.print(f'[@tertiary #auto bold] PAYLOAD ({len(packet.payload)}) ')
         for row in payload:
             tim.print(f'> {row} ')
     print()
@@ -62,12 +62,12 @@ def recommendation(packet, choice):
     reply = best[1]['C']
     lenmsg = reply.payload if len(reply.payload) else 'EMPTY REPLY'
 
-    tim.print(f'[@primary #auto bold] RESPONSE ({lenmsg}) ')
-    tim.print(f'[@secondary #auto bold] Distance [@surface #auto] {dist}')
+    tim.print(f'[@primary #auto bold] RESPONSE [@primary #auto /bold]({lenmsg}) ')
+    tim.print(f'[@secondary #auto bold] Distance [@surface #auto] {dist} ')
 
     if reply.payload:
         payload = hexdump(reply.payload)
-        tim.print(f'[@tertiary #auto bold] PAYLOAD ({len(reply.payload)})')
+        tim.print(f'[@tertiary #auto bold] PAYLOAD ({len(reply.payload)}) ')
         for row in payload:
             tim.print(f'> {row} ')
     print()
