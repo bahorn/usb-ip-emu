@@ -42,7 +42,7 @@ class USBIP(Protocol):
         pass
 
     def dataReceived(self, data):
-        logging.info('Message Recieved')
+        logging.debug('Message Recieved')
         match self.state:
             case USBIPState.OP:
                 self.operation(data)
@@ -88,11 +88,11 @@ class USBIP(Protocol):
         if res:
             match res.command:
                 case USBIPCmd.USBIP_CMD_SUBMIT:
-                    print(res.ep)
                     usb_packet = USBPacket(
                         0, res.ep, res.setup, res.transfer_buffer
                     )
-
+                    # All zero setup packets are just worth ignoring it seems.
+                    # avoids an annoying bug where the host will spam URBs.
                     if usb_packet.setup.bytes == b'\x00'*8:
                         return
                     # now let the device process the message

@@ -53,23 +53,23 @@ class USBSetup:
         """
         Check if the setup data and data matches.
         """
-        if bmRequestType:
+        if bmRequestType is not None:
             if self.bmRequestType() != bmRequestType:
                 return False
 
-        if bRequest:
+        if bRequest is not None:
             if self.bRequest() != bRequest:
                 return False
 
-        if wValue:
+        if wValue is not None:
             if self.wValue() != wValue:
                 return False
 
-        if wIndex:
+        if wIndex is not None:
             if self.wIndex() != wIndex:
                 return False
 
-        if wLength:
+        if wLength is not None:
             if wLength != self.wLength():
                 return False
 

@@ -102,6 +102,20 @@ optional = false
 python-versions = ">=3.8"
 
 [[package]]
+name = "pytermgui"
+version = "7.3.0"
+description = "Python TUI framework with mouse support, modular widget system, customizable and rapid terminal markup language and more!"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+typing-extensions = "*"
+
+[package.extras]
+yaml = ["pyyaml"]
+
+[[package]]
 name = "scapy"
 version = "2.5.0"
 description = "Scapy: interactive packet manipulation tool"
@@ -205,7 +219,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "9e567eaedfc2c9bbbb71727adb78cea1f89c46e1abf530a9a6fc1932515ce0bf"
+content-hash = "2014886c0e5c823f6f9656169bd9e48a34d266bb912ad407b10d4e3388489cc7"
 
 [metadata.files]
 attrs = [
@@ -358,6 +372,10 @@ numpy = [
     {file = "numpy-1.24.1-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ad2925567f43643f51255220424c23d204024ed428afc5aad0f86f3ffc080086"},
     {file = "numpy-1.24.1-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:cfa1161c6ac8f92dea03d625c2d0c05e084668f4a06568b77a25a89111621566"},
     {file = "numpy-1.24.1.tar.gz", hash = "sha256:2386da9a471cc00a1f47845e27d916d5ec5346ae9696e01a8a34760858fe9dd2"},
+]
+pytermgui = [
+    {file = "pytermgui-7.3.0-py3-none-any.whl", hash = "sha256:a08e525c6bd7fe74bb3d0910bd37bd2b9eb6dbb98667f807cce2cd02eb8e9525"},
+    {file = "pytermgui-7.3.0.tar.gz", hash = "sha256:3a6211e872fae6b6a6445efff2260266f33d288a7ec64411238a673a23f333af"},
 ]
 scapy = [
     {file = "scapy-2.5.0.tar.gz", hash = "sha256:5b260c2b754fd8d409ba83ee7aee294ecdbb2c235f9f78fe90bc11cb6e5debc2"},

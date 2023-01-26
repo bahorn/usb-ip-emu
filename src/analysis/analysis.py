@@ -16,7 +16,6 @@ class PacketSearch:
     def __init__(self, files):
         self.pcaps = [rdpcap(file) for file in files]
         self._pairs = self.pairs()
-        print(self._pairs)
 
     def pairs(self):
         """
@@ -34,7 +33,7 @@ class PacketSearch:
                     0,
                     pkt.epnum,
                     pkt.setup,
-                    pkt.payload
+                    bytes(pkt.payload)
                 )
                 pairs[key][chr(pkt.type)] = new_pkt
 

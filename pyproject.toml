@@ -16,6 +16,7 @@ Twisted = "^22.10.0"
 bitarray = "^2.6.2"
 scapy = "^2.5.0"
 scipy = "^1.10.0"
+PyTermGUI = "^7.3.0"
 
 [tool.poetry.dev-dependencies]
 

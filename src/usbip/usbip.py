@@ -73,7 +73,6 @@ class USBIPHeaderBasic:
             self.devid = devid
             self.direction = direction
             self.ep = ep
-            print('>', self.ep)
         except struct.error:
             raise ParseError('Unable to unpack `usbip_header_basic`')
 
@@ -91,7 +90,7 @@ class USBIPCmdSubmit(USBIPHeaderBasic):
             setup_message = message[0x28:0x28+8]
 
             n = 0
-            if self.direction == USBIPDirection.USBIP_DIR_OUT:
+            if self.direction == USBIPDirection.USBIP_DIR_OUT.value:
                 n = transfer_buffer_length
 
             transfer_buffer = b''
@@ -145,7 +144,8 @@ class USBIPRetSubmit:
         # start_frame
         message += struct.pack('>I', 0)
         # number_of_packets
-        message += struct.pack('>I', 0) # 0xffffffff
+        message += struct.pack('>I', 0)
+        # 0xffffffff
         # error count
         message += struct.pack('>I', 0)
         # setup padding

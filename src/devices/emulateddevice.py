@@ -68,7 +68,6 @@ class EmulatedDevice(BaseDevice):
         """
         Return an approiate packet in response.
         """
-        print(packet.setup)
         if packet.setup.bytes == b'\x00' * 8:
             return None
 
@@ -85,7 +84,6 @@ class EmulatedDevice(BaseDevice):
         res = self.analysis.search(score_function)
 
         # for these, we need to consider the wLength() value.
-
         self.callback('recommendation', (packet, res))
 
         # nothing close, just return nothing
@@ -96,7 +94,6 @@ class EmulatedDevice(BaseDevice):
 
         if not best[1]['C']:
             return None
-        print(best[1]['C'])
 
         return FixedDescriptor(bytes(best[1]['C'].payload))
 

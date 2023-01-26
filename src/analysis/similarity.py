@@ -1,7 +1,6 @@
 """
 Packet Similarity.
 """
-from scipy.spatial.distance import hamming
 
 
 class ComparePackets:
@@ -23,17 +22,10 @@ class ComparePackets:
         if p1.xfer_type != p2.xfer_type:
             return res
 
-        print('> endpoint', p1.endpoint, p2.endpoint)
         if p1.endpoint != p2.endpoint:
             return res
 
         # Validate the setup, allow non-matching setup lengths
-
-        print('> bmRequestType',
-              p1.setup.bmRequestType(),
-              p2.setup.bmRequestType()
-              )
-
         if p1.setup.bmRequestType() != p2.setup.bmRequestType():
             return res
 
@@ -46,19 +38,17 @@ class ComparePackets:
         if p1.setup.wIndex() != p2.setup.wIndex():
             return res
 
-        print('made it')
-
         if len(p1.payload) == 0:
             return (True, 0)
 
         if len(p1.payload) != len(p2.payload):
             return res
 
-        print('hit')
-
         # now go through each byte in data, earlier bytes are more meaninful
         # for distance than later bytes.
         weights = [self.decay ** i for i in range(len(p1.payload))]
-        dist = hamming(list(p1.payload), list(p2.payload), weights)
+        dist = 0
+        for idx, (weight, a1, a2) in enumerate(zip(weights, p1.payload, p2.payload)):
+            dist += weight * 1 * (1 - int(a1 == a2))
 
         return (True, dist)
