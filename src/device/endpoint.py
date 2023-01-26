@@ -4,7 +4,7 @@ Endpoint
 from bitarray import bitarray
 
 from .descriptors import EndpointDescriptor
-from .enum import TransferType, SynchronisationType, UsageType
+from protocol.usb.enum import TransferType, SynchronisationType, UsageType
 
 
 class Endpoint:

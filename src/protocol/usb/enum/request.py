@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class StandardRequestID(Enum):
     # https://www.beyondlogic.org/usbnutshell/usb6.shtml
     GET_STATUS = 0x00
@@ -15,3 +16,5 @@ class StandardRequestID(Enum):
     SET_INTERFACE = 0x11
 
     SYNCH_FRAME = 0x12
+
+    SET_IDLE = 0x0a

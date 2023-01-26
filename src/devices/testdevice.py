@@ -3,7 +3,6 @@ from device.configuration import Configuration
 from device.endpoint import Endpoint
 from device.interface import Interface
 from device.strings import Strings, Languages
-from device.enum import USBSpeed
 
 
 class TestDevice(BaseDevice):

@@ -3,6 +3,8 @@ from protocol.usbmon import \
         SetupPacket, \
         StringDescriptor, \
         DeviceDescriptor
+import random
+from protocol.usb import USBPacket
 from scapy.all import rdpcap
 
 
@@ -14,6 +16,7 @@ class PacketSearch:
     def __init__(self, files):
         self.pcaps = [rdpcap(file) for file in files]
         self._pairs = self.pairs()
+        print(self._pairs)
 
     def pairs(self):
         """
@@ -21,11 +24,20 @@ class PacketSearch:
         """
         pairs = {}
         for capture in self.pcaps:
+            i = random.randint(0, 10000)
             for packet in capture:
                 pkt = USBmon(bytes(packet))
-                if pkt.id not in pairs:
-                    pairs[pkt.id] = {'S': None, 'C': None}
-                pairs[pkt.id][chr(pkt.type)] = pkt
+                key = f'{i}_{pkt.id}'
+                if key not in pairs:
+                    pairs[key] = {'S': None, 'C': None}
+                new_pkt = USBPacket(
+                    0,
+                    pkt.epnum,
+                    pkt.setup,
+                    pkt.payload
+                )
+                pairs[key][chr(pkt.type)] = new_pkt
+
         return pairs
 
     def match(self, func):
@@ -164,6 +176,39 @@ class PCAPAnalysis:
             strings[language_id][string_idx] = (length, string)
 
         return strings
+
+    def hid_reports(self):
+        """
+        Dump the GET_DESCRIPTOR hid report
+        """
+        hid_reports = {}
+
+        def is_hid_report(pkt):
+            if 'setup' not in pkt.fields:
+                return False
+
+            setup = SetupPacket(pkt.setup)
+
+            if 'descriptor_type' not in setup.fields:
+                return False
+
+            return setup.descriptor_type == 0x22 and \
+                setup.bmRequestType == 0x81
+
+        for request, response in self.ps.match(is_hid_report):
+            setup = SetupPacket(request.setup)
+            descriptor_index = setup.descriptor_index
+            interface_number = setup.wIndex
+            key = (interface_number, descriptor_index)
+            if key not in hid_reports:
+                hid_reports[key] = (0, None)
+
+            if setup.wLength <= hid_reports[key][0]:
+                continue
+
+            hid_reports[key] = (setup.wLength, bytes(response.payload))
+
+        return hid_reports
 
     def search(self, func):
         return self.ps.score(func)

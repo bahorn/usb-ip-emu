@@ -1,5 +1,5 @@
 from .base import BaseDescriptor
-from device.enum import DescriptorTypes
+from protocol.usb.enum import DescriptorTypes
 
 
 class InterfaceDescriptor(BaseDescriptor):
@@ -16,5 +16,3 @@ class InterfaceDescriptor(BaseDescriptor):
         (1, 'bInterfaceProtocol'),
         (1, 'iInterface')
     ]
-
-

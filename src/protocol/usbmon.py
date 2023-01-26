@@ -3,6 +3,7 @@ Terrible Scapy USBMon implementation.
 """
 from scapy.packet import Packet
 from scapy.fields import \
+        BitField, \
         ByteEnumField, \
         XByteField, \
         XByteEnumField, \
@@ -12,7 +13,6 @@ from scapy.fields import \
         ConditionalField, \
         LESignedIntField, \
         StrFixedLenField, \
-        ShortField, \
         LEIntField, \
         LEShortField, \
         XLEIntField, \
@@ -57,7 +57,8 @@ class USBmon(Packet):
         XLELongField("id", 0),
         XByteEnumField("type", 0xFF, _usbmon_types),
         ByteEnumField("xfer_type", 0xFF, _usbmon_xfer_types),
-        XByteField("epnum", 0),
+        BitField("transfer_direction", 0, 4),
+        BitField("epnum", 0, 4),
         ByteField("devnum", 0),
         LEShortField("busnum", 0),
         XByteField("flag_setup", 0),
@@ -142,6 +143,7 @@ class StringDescriptor(Packet):
         ByteField('bLength', 0),
         ByteField('bDescriptorType', 0x03)
     ]
+
 
 class DeviceDescriptor(Packet):
     name = "USB Device Descriptor"

@@ -3,8 +3,9 @@ from .enum import \
         Recipient, \
         Type, \
         TransferDirection, \
+        FeatureSelector, \
         StandardRequestID as Request
-from .descriptors import DescriptorTypes
+from device.descriptors import DescriptorTypes
 
 
 class RequestType:
@@ -23,8 +24,9 @@ class USBSetup:
     """
 
     def __init__(self, setup_data):
+        self.bytes = setup_data
         bmRequestType, bRequest, wValue, wIndex, wLength \
-                = struct.unpack('<BBHHH', setup_data)
+            = struct.unpack('<BBHHH', setup_data)
         self._bmRequestType = bmRequestType
         self._bRequest = Request(bRequest)
         self._wValue = wValue
@@ -193,6 +195,34 @@ class EndpointSynchFrame(EndpointRequest):
     pass
 
 
+# HID
+
+class HIDReport(USBSetup):
+    def descriptor_type(self):
+        return DescriptorTypes(
+                    self.wValue().to_bytes(2, byteorder='little')[1]
+                )
+
+    def descriptor_index(self):
+        return self.wValue().to_bytes(2, byteorder='little')[0]
+
+    def interface_number(self):
+        return self.wIndex()
+
+
+class SetIdle(USBSetup):
+    def duration(self):
+        return DescriptorTypes(
+                    self.wValue().to_bytes(2, byteorder='little')[1]
+                )
+
+    def report_id(self):
+        return self.wValue().to_bytes(2, byteorder='little')[0]
+
+    def interface(self):
+        return self.wIndex()
+
+
 def process_USB_setup(setup_data):
     """
     Return the class representing the correct USB Setup request.
@@ -231,7 +261,10 @@ def process_USB_setup(setup_data):
         ((0b00000010, Request.CLEAR_FEATURE, None, None, 0),
             EndpointClearFeature),
         ((0b00000010, Request.SET_FEATURE, None, None, 0), EndpointSetFeature),
-        ((0b10000010, Request.SYNCH_FRAME, 0, None, 2), EndpointSynchFrame)
+        ((0b10000010, Request.SYNCH_FRAME, 0, None, 2), EndpointSynchFrame),
+        # HID
+        ((0b10000001, Request.GET_DESCRIPTOR, None, None, None), HIDReport),
+        ((0b00100001, Request.SET_IDLE, None, None, None), SetIdle)
     ]
 
     for standard_packet, type in standard_packets:

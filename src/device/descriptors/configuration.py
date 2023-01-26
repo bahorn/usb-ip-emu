@@ -1,5 +1,5 @@
 from .base import BaseDescriptor
-from device.enum import DescriptorTypes
+from protocol.usb.enum import DescriptorTypes
 
 
 class ConfigurationDescriptor(BaseDescriptor):

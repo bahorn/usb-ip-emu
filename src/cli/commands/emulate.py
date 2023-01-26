@@ -8,6 +8,19 @@ from devices.emulateddevice import EmulatedDevice
 from device.devicelist import DeviceList
 
 
+def pre_response(packet):
+    #print(packet.setup.wValue())
+    pass
+
+
+def post_response(packet, response):
+    #print(response)
+    pass
+
+def recommendation(packet, choice):
+    #print(choice)
+    pass
+
 @click.command()
 @click.option('--host', default='0.0.0.0')
 @click.option('--port', default=3240)
@@ -28,7 +41,13 @@ def emulate(host, port, pcaps):
     if len(pcaps_) == 0:
         return
 
-    emulated_device = EmulatedDevice(pcaps_)
+    callbacks = {
+        'pre_response': pre_response,
+        'post_response': post_response,
+        'recommendation': recommendation
+    }
+    emulated_device = EmulatedDevice(pcaps_, callbacks)
+
     device_list.register((1, 1), emulated_device)
     usb_server = USBIPServer(host, port, device_list)
     usb_server.start()

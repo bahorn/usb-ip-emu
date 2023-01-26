@@ -7,7 +7,6 @@ Based on:
 # import binascii
 import logging
 from enum import Enum
-
 from twisted.internet.protocol import Protocol, Factory
 from twisted.internet.endpoints import TCP4ServerEndpoint
 from twisted.internet import reactor
@@ -18,6 +17,7 @@ from .message import \
         USBIPReplyDevlist, \
         USBIPReplyImport
 
+from protocol.usb import USBPacket
 from .usbip import process_message, USBIPCmd, USBIPRetUnlink, USBIPRetSubmit
 
 
@@ -88,18 +88,29 @@ class USBIP(Protocol):
         if res:
             match res.command:
                 case USBIPCmd.USBIP_CMD_SUBMIT:
+                    print(res.ep)
+                    usb_packet = USBPacket(
+                        0, res.ep, res.setup, res.transfer_buffer
+                    )
+
+                    if usb_packet.setup.bytes == b'\x00'*8:
+                        return
                     # now let the device process the message
-                    response = self.device.command(res)
+                    response = self.device.command(usb_packet)
                     # decide how we pack this.
                     if response:
                         self.transport.write(
-                                USBIPRetSubmit(
-                                    res.seqnum, 0, response.pack()
-                                ).pack()
+                            USBIPRetSubmit(
+                                res.seqnum, 0, response.pack()
+                            ).pack()
+                        )
+                    else:
+                        self.transport.write(
+                            USBIPRetSubmit(res.seqnum, -32, b'').pack()
                         )
                 case USBIPCmd.USBIP_CMD_UNLINK:
                     return self.transport.write(
-                            USBIPRetUnlink(res.unlink_seqnum[0], 0).pack()
+                            USBIPRetUnlink(res.seqnum, 0).pack()
                     )
 
 

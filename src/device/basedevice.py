@@ -5,8 +5,8 @@ from .descriptors import \
         DeviceDescriptor, \
         DescriptorTypes, \
         MaxSize
-from .setup import \
-        process_USB_setup, \
+
+from protocol.usb.setup import \
         DeviceGetStatus, \
         DeviceClearFeature, \
         DeviceSetFeature, \
@@ -14,10 +14,12 @@ from .setup import \
         DeviceGetDescriptor, \
         DeviceSetDescriptor, \
         DeviceGetConfiguration, \
-        DeviceSetConfiguration
+        DeviceSetConfiguration, \
+        HIDReport, \
+        SetIdle
 
-from .enum import USBVersions
-from .enum import USBSpeed
+from protocol.usb.enum import USBVersions
+from protocol.usb.enum import USBSpeed
 
 
 class BaseDevice:
@@ -97,10 +99,12 @@ class BaseDevice:
         """
         Process an URB for this device.
         """
-        setup = process_USB_setup(packet.setup)
+        packet_ = self.pre_response(packet)
+        setup = packet_.setup
 
         result = None
         handled = True
+        no_reply = False
 
         match setup:
             # Default Device Requests
@@ -120,13 +124,21 @@ class BaseDevice:
                 result = self.get_configuration(setup)
             case _ if isinstance(setup, DeviceSetConfiguration):
                 result = self.set_configuration(setup)
+            case _ if isinstance(setup, HIDReport):
+                result = self.hid_report(setup)
+            case _ if isinstance(setup, SetIdle):
+                self.set_idle(setup)
+                no_reply = True
             case _:
                 handled = False
+
+        if no_reply:
+            return None
 
         if handled:
             return MaxSize(result, setup.wLength())
 
-        return self.message_handler(packet)
+        return self.message_handler(packet_)
 
     def descriptor(self):
         return DeviceDescriptor(
@@ -222,12 +234,33 @@ class BaseDevice:
         self._active_configuration = setup.configuration_value()
         return None
 
+    # HID REPORT request
+    def hid_report(self, setup):
+        return None
+
+    # SET_IDLE
+    def set_idle(self, setup):
+        pass
+
     def unknown(self, setup):
         """
         Unknown setup command!
         """
         print('unknown setup command')
         return None
+
+    def pre_response(self, packet):
+        """
+        Called when receiving a packet, allows modification of the packet or do
+        implement logging, etc.
+        """
+        return packet
+
+    def post_response(self, packet, response):
+        """
+        Called after deciding a response, allows modification to the response.
+        """
+        return response
 
     def message_handler(self, packet):
         """
