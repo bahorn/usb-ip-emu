@@ -48,7 +48,7 @@ class ComparePackets:
         # for distance than later bytes.
         weights = [self.decay ** i for i in range(len(p1.payload))]
         dist = 0
-        for idx, (weight, a1, a2) in enumerate(zip(weights, p1.payload, p2.payload)):
+        for weight, a1, a2 in zip(weights, p1.payload, p2.payload):
             dist += weight * 1 * (1 - int(a1 == a2))
 
         return (True, dist)

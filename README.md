@@ -5,7 +5,8 @@ Either custom or based off packet captures, for the purpose of reverse
 engineering or debugging.
 
 Very early stages, only emulation works right now, with limitations.
-(Don't expect isochronous transfers, etc)
+(Don't expect isochronous transfers, etc).
+Control transfers are primarily what works right now.
 
 Name is from the lore in Mike Pondsmith's Cyberpunk, where the SoulKiller is a
 program that copies someones mind. (Which I thought fit with copying USB
